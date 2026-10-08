@@ -1,0 +1,280 @@
+{
+  "generator_version": "0.2.0",
+  "title": "缩放点积注意力的局部机制复现",
+  "question": "在独立、零均值、单位方差的随机 Q/K 输入下，除以 sqrt(d_k) 是否符合论文公式，并使 logits 方差在不同维度下保持接近 1？",
+  "scope": "仅验证 Attention Is All You Need 第 3.2.1 节公式 (1) 与脚注 4 的随机输入机制。未训练 Transformer，未使用 WMT 数据，未验证 BLEU。阈值是本实验的操作化条件。",
+  "reproduction_level": "mechanism",
+  "metric": {
+    "name": "variance_error",
+    "direction": "minimize",
+    "min_delta": 0.01
+  },
+  "conditions_met": true,
+  "recorded_on": "2026-10-08",
+  "environment": {
+    "os": "Windows",
+    "python": "3.12.14",
+    "numpy": "2.3.5"
+  },
+  "trials": [
+    {
+      "id": "6fa25e6dfd84",
+      "label": "Unscaled baseline",
+      "phase": "development",
+      "status": "completed",
+      "summary": {
+        "n": 5,
+        "mean": 110.35619920627866,
+        "stdev": 0.5633835981983469,
+        "min": 109.50175172424402,
+        "max": 110.87311662684591
+      }
+    },
+    {
+      "id": "2e9f6dbf7252",
+      "label": "Over-scaled control: metric may improve but equation should fail",
+      "phase": "development",
+      "status": "completed",
+      "summary": {
+        "n": 5,
+        "mean": 0.9726365833410507,
+        "stdev": 0.0004278667880818166,
+        "min": 0.972061930671064,
+        "max": 0.9730555528029022
+      }
+    },
+    {
+      "id": "49c07b095b52",
+      "label": "Paper square-root scaling",
+      "phase": "development",
+      "status": "completed",
+      "summary": {
+        "n": 5,
+        "mean": 0.010239373510136448,
+        "stdev": 0.0019772606717433122,
+        "min": 0.007586344631540139,
+        "max": 0.012541749866504026
+      }
+    },
+    {
+      "id": "1fd8cc218cc3",
+      "label": "Frozen baseline",
+      "phase": "confirmation",
+      "status": "completed",
+      "summary": {
+        "n": 5,
+        "mean": 221.96408074563846,
+        "stdev": 2.169787010719591,
+        "min": 219.38839018977316,
+        "max": 224.77927099464486
+      }
+    },
+    {
+      "id": "756b59e54214",
+      "label": "Frozen candidate",
+      "phase": "confirmation",
+      "status": "completed",
+      "summary": {
+        "n": 5,
+        "mean": 0.013190355112756406,
+        "stdev": 0.0065892700243440835,
+        "min": 0.007724669231666777,
+        "max": 0.0232228284898444
+      }
+    }
+  ],
+  "comparison": {
+    "baseline": "1fd8cc218cc3",
+    "candidate": "756b59e54214",
+    "phase": "confirmation",
+    "baseline_summary": {
+      "n": 5,
+      "mean": 221.96408074563846,
+      "stdev": 2.169787010719591,
+      "min": 219.38839018977316,
+      "max": 224.77927099464486
+    },
+    "candidate_summary": {
+      "n": 5,
+      "mean": 0.013190355112756406,
+      "stdev": 0.0065892700243440835,
+      "min": 0.007724669231666777,
+      "max": 0.0232228284898444
+    },
+    "selection_status": "score_improved_conditions_met",
+    "candidate_conditions_met": true
+  },
+  "claims": [
+    {
+      "id": "C1",
+      "statement": "实现与论文 scaled dot-product attention 的 logits 缩放公式一致。",
+      "criterion": {
+        "metric": "equation_max_error",
+        "operator": "le",
+        "threshold": 1e-10
+      },
+      "status": "supported_in_scope",
+      "condition_met": true,
+      "observed": {
+        "n": 5,
+        "mean": 0.0,
+        "stdev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "per_seed": [
+        {
+          "seed": 101,
+          "value": 0.0,
+          "passed": true,
+          "run_status": "completed"
+        },
+        {
+          "seed": 127,
+          "value": 0.0,
+          "passed": true,
+          "run_status": "completed"
+        },
+        {
+          "seed": 151,
+          "value": 0.0,
+          "passed": true,
+          "run_status": "completed"
+        },
+        {
+          "seed": 181,
+          "value": 0.0,
+          "passed": true,
+          "run_status": "completed"
+        },
+        {
+          "seed": 211,
+          "value": 0.0,
+          "passed": true,
+          "run_status": "completed"
+        }
+      ],
+      "passed_seeds": 5,
+      "evaluated_seeds": 5,
+      "expected_seeds": 5
+    },
+    {
+      "id": "C2",
+      "statement": "在声明的独立标准正态输入下，缩放后的 logits 方差在不同维度上接近 1。",
+      "criterion": {
+        "metric": "variance_error",
+        "operator": "le",
+        "threshold": 0.08
+      },
+      "status": "supported_in_scope",
+      "condition_met": true,
+      "observed": {
+        "n": 5,
+        "mean": 0.013190355112756406,
+        "stdev": 0.0065892700243440835,
+        "min": 0.007724669231666777,
+        "max": 0.0232228284898444
+      },
+      "per_seed": [
+        {
+          "seed": 101,
+          "value": 0.010477366701652854,
+          "passed": true,
+          "run_status": "completed"
+        },
+        {
+          "seed": 127,
+          "value": 0.016390868922506446,
+          "passed": true,
+          "run_status": "completed"
+        },
+        {
+          "seed": 151,
+          "value": 0.008136042218111558,
+          "passed": true,
+          "run_status": "completed"
+        },
+        {
+          "seed": 181,
+          "value": 0.0232228284898444,
+          "passed": true,
+          "run_status": "completed"
+        },
+        {
+          "seed": 211,
+          "value": 0.007724669231666777,
+          "passed": true,
+          "run_status": "completed"
+        }
+      ],
+      "passed_seeds": 5,
+      "evaluated_seeds": 5,
+      "expected_seeds": 5
+    },
+    {
+      "id": "C3",
+      "statement": "在本实验随机输入下，注意力分布不进入严重饱和；以归一化熵作本次代理指标。",
+      "criterion": {
+        "metric": "normalized_entropy",
+        "operator": "ge",
+        "threshold": 0.75
+      },
+      "status": "supported_in_scope",
+      "condition_met": true,
+      "observed": {
+        "n": 5,
+        "mean": 0.8867193229172968,
+        "stdev": 0.0008522060809048202,
+        "min": 0.8856174449265466,
+        "max": 0.8879337849862162
+      },
+      "per_seed": [
+        {
+          "seed": 101,
+          "value": 0.8856174449265466,
+          "passed": true,
+          "run_status": "completed"
+        },
+        {
+          "seed": 127,
+          "value": 0.8879337849862162,
+          "passed": true,
+          "run_status": "completed"
+        },
+        {
+          "seed": 151,
+          "value": 0.8870528940893189,
+          "passed": true,
+          "run_status": "completed"
+        },
+        {
+          "seed": 181,
+          "value": 0.8865470912042305,
+          "passed": true,
+          "run_status": "completed"
+        },
+        {
+          "seed": 211,
+          "value": 0.8864453993801721,
+          "passed": true,
+          "run_status": "completed"
+        }
+      ],
+      "passed_seeds": 5,
+      "evaluated_seeds": 5,
+      "expected_seeds": 5
+    },
+    {
+      "id": "C4",
+      "statement": "原论文完整 Transformer 的 WMT 翻译质量及训练成本结论。",
+      "criterion": null,
+      "status": "not_tested",
+      "condition_met": null,
+      "observed": null,
+      "per_seed": [],
+      "passed_seeds": 0,
+      "evaluated_seeds": 0,
+      "expected_seeds": 5
+    }
+  ]
+}

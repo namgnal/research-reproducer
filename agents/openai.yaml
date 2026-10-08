@@ -1,0 +1,4 @@
+interface:
+  display_name: "研究复现与实验台"
+  short_description: "将论文与研究设想转为可执行实验，保存基线、对照、验收标准及复现证据"
+  default_prompt: "使用 $research-reproducer 将这篇论文的一个关键主张转为可复跑的实验，先明确复现范围，再执行基线、对照与独立验证。"

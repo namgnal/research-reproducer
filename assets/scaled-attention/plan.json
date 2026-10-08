@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "title": "缩放点积注意力的局部机制复现",
+  "question": "在独立、零均值、单位方差的随机 Q/K 输入下，除以 sqrt(d_k) 是否符合论文公式，并使 logits 方差在不同维度下保持接近 1？",
+  "reproduction_level": "mechanism",
+  "scope": "仅验证 Attention Is All You Need 第 3.2.1 节公式 (1) 与脚注 4 的随机输入机制。未训练 Transformer，未使用 WMT 数据，未验证 BLEU。阈值是本实验的操作化条件。",
+  "files": ["attention.py", "evaluate.py", "config.json"],
+  "protected_files": ["evaluate.py"],
+  "command": ["{python}", "evaluate.py", "--seed", "{seed}", "--phase", "{phase}", "--output", "{result}"],
+  "seeds": [11, 23, 37, 53, 71],
+  "confirmation_seeds": [101, 127, 151, 181, 211],
+  "metric": {"name": "variance_error", "direction": "minimize", "min_delta": 0.01},
+  "budget": {"max_trials": 8, "per_run_seconds": 30, "total_seconds": 240},
+  "required_checks": ["finite_arrays", "correct_shapes", "normalized_weights", "weights_match_softmax", "output_matches_weights"],
+  "claims": [
+    {"id": "C1", "statement": "实现与论文 scaled dot-product attention 的 logits 缩放公式一致。", "source_url": "https://arxiv.org/abs/1706.03762", "source_location": "v7, p.4, Section 3.2.1, Eq. (1)", "criterion": {"metric": "equation_max_error", "operator": "le", "threshold": 1e-10}},
+    {"id": "C2", "statement": "在声明的独立标准正态输入下，缩放后的 logits 方差在不同维度上接近 1。", "source_url": "https://arxiv.org/abs/1706.03762", "source_location": "v7, p.4, footnote 4 and Section 3.2.1", "criterion": {"metric": "variance_error", "operator": "le", "threshold": 0.08}},
+    {"id": "C3", "statement": "在本实验随机输入下，注意力分布不进入严重饱和；以归一化熵作本次代理指标。", "source_url": "https://arxiv.org/abs/1706.03762", "source_location": "v7, p.4, Section 3.2.1 discussion; entropy threshold is local, not reported in the paper", "criterion": {"metric": "normalized_entropy", "operator": "ge", "threshold": 0.75}},
+    {"id": "C4", "statement": "原论文完整 Transformer 的 WMT 翻译质量及训练成本结论。", "source_url": "https://arxiv.org/abs/1706.03762", "source_location": "v7, Sections 5–6 and Table 2", "criterion": null}
+  ]
+}
